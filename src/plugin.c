@@ -169,12 +169,16 @@ void plugin_get_data(int *_frame_number, int *_nx, int *_ny, int *_data_array,
   fclose(fin);
 
   // decompress => intermediate buffer if nbytes == 2 else straight to target
-  // if nbytes is 4 - if 16 bit just copying not sign extending quite yet...
+  // if nbytes is 4
   if (nbytes == 2) {
     uint16_t *buffer = (uint16_t *)malloc(nbytes * ny * nx);
     bshuf_decompress_lz4((chunk) + 12, (void *)buffer, ny * nx, nbytes, 0);
     for (int j = 0; j < ny * nx; j++) {
-      _data_array[j] = buffer[j];
+      if (buffer[j] < 0xfffe) {
+        _data_array[j] = buffer[j];
+      } else {
+        _data_array[j] = (int) (0xffff0000 & buffer[j]);
+      }
     }
     free(buffer);
   } else if (nbytes == 4) {
