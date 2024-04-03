@@ -15,12 +15,32 @@ Assumptions:
 
 ## Building
 
-FIXME write this.
+First ensure you do a recursive clone of the repo i.e.
+
+```
+git clone --recursive git@github.com:graeme-winter/ramdisk-plugin.git
+```
+
+This will clone the `bitshuffle` and `cJSON` repositories also, which are dependencies of the ramdisk plugin. Building is simple: `make` - this will build the plugin `build/ramdisk-plugin.so`. You can also build a test program with `make test`.
+
+The test program can be run as `./build/test <dumped stream directory>` and will first print out a few header details before printing the totals of unmasked pixels.
 
 ## Usage
 
-FIXME also write this.
+As with other usages of plugins with XDS:
+
+```
+LIB= /Users/graeme/git/ramdisk-plugin/build/ramdisk-plugin.so
+```
+
+N.B. at the moment this _will not work_ because setting XDS.INP parameter:
+
+```
+NAME_TEMPLATE_OF_DATA_FRAMES= /Users/graeme/data/i04-1-run3-ins/ramdisk/
+```
+
+is not currently supported. Trying to figure out a workaround for this.
 
 ## Testing
 
-Guess what? FIXME write this.
+There really should be some, certainly more than a `test` binary.
