@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "bitshuffle.h"
 #include "cJSON/cJSON.h"
 
 // common block
@@ -133,6 +134,11 @@ void plugin_get_header(int *_nx, int *_ny, int *_nbytes, float *_qx, float *_qy,
   qx *= 1000.0;
   qy *= 1000.0;
 
+  if ((nbytes != 2) && (nbytes != 4)) {
+    fprintf(stderr, "Image depth of %d bytes unsupported\n", nbytes);
+    *error = 1;
+  }
+
   *_nx = nx;
   *_ny = ny;
   *_nbytes = nbytes;
@@ -140,3 +146,42 @@ void plugin_get_header(int *_nx, int *_ny, int *_nbytes, float *_qx, float *_qy,
   *_qy = qy;
   *_number_of_frames = number_of_frames;
 }
+
+void plugin_get_data(int *_frame_number, int *_nx, int *_ny, int *_data_array,
+                     int info[1024], int *error) {
+  *error = 0;
+
+  char scr[1280];
+  sprintf(scr, "%s/image_%06d_2", directory, (*_frame_number) - 1);
+
+  if (stat(scr, &st)) {
+    fprintf(stderr, "Error reading %s\n", scr);
+    *error = 1;
+    return;
+  }
+
+  char *chunk = (char *)malloc(sizeof(char) * (st.st_size + 1));
+
+  FILE *fin = fopen(argv[1], "r");
+  fread(chunk, st.st_size, 1, fin);
+  fclose(fin);
+
+  // decompress => intermediate buffer if nbytes == 2 else straight to target
+  // if nbytes is 4 - if 16 bit just copying not sign extending quite yet...
+  if (nbytes == 2) {
+    uint16_t *buffer = (uint16_t *)malloc(nbytes * ny * nx);
+    bshuf_decompress_lz4((chunk) + 12, (void *)buffer, st.st_size, 16, 0);
+    for (int j = 0; j < ny * nx, j++) {
+      _data_array[j] = buffer[j];
+    }
+    free(buffer);
+  } else if (nbytes == 4) {
+    bshuf_decompress_lz4((chunk) + 12, (void *)_data_array, st.st_size, 32, 0);
+  } else {
+    // we should never get here
+  }
+
+  free(chunk);
+}
+
+void plugin_close(int *error) { *error = 0; }
