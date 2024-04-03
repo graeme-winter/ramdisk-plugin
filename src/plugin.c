@@ -41,7 +41,7 @@ void plugin_open(char *filename, int info[1024], int *error) {
   *error = 0;
 
   // not really sure what this is useful for...
-  memset(info, 1024, sizeof(int));
+  memset(info, 0, 1024 * sizeof(int));
   info[0] = 1;
 
   if (strlen(filename) > 1023) {
