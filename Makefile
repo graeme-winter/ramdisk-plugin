@@ -12,8 +12,11 @@ CFLAGS=-Wall -O2 -fpic -I$(INC_DIR) -I$(CJSON) -I$(BITSHUFFLE) -I$(BITSHUFFLE_LZ
 .PHONY: plugin
 plugin: $(BUILD_DIR)/ramdisk-plugin.so
 
+.PHONY: test
+test: $(BUILD_DIR)/test
+
 .PHONY: all
-all: plugin
+all: plugin test
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(BUILD_DIR)
@@ -28,10 +31,18 @@ $(BITSHUFFLE_LZ4)/%.o: $(BITSHUFFLE_LZ4)/%.c
 $(CJSON)/%.o: $(CJSON)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+$(TEST_DIR)/%.o: $(TEST_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(BUILD_DIR)/ramdisk-plugin.so: $(BUILD_DIR)/plugin.o $(CJSON)/cJSON.o $(BITSHUFFLE_LZ4)/lz4.o \
 $(BITSHUFFLE)/bitshuffle.o $(BITSHUFFLE)/bitshuffle_core.o $(BITSHUFFLE)/iochain.o
 	mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -shared $^ -o $(BUILD_DIR)/ramdisk-plugin.so
+
+$(BUILD_DIR)/test: $(TEST_DIR)/test.o $(BUILD_DIR)/plugin.o $(CJSON)/cJSON.o $(BITSHUFFLE_LZ4)/lz4.o \
+$(BITSHUFFLE)/bitshuffle.o $(BITSHUFFLE)/bitshuffle_core.o $(BITSHUFFLE)/iochain.o
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $^ -o $(BUILD_DIR)/test
 
 .PHONY: clean
 clean:
