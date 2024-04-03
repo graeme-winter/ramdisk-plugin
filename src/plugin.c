@@ -6,7 +6,7 @@
 #include <sys/types.h>
 
 #include "bitshuffle.h"
-#include "cJSON/cJSON.h"
+#include "cJSON.h"
 
 // common block
 
@@ -41,7 +41,7 @@ void plugin_open(char *filename, int info[1024], int *error) {
   *error = 0;
 
   // not really sure what this is useful for...
-  memset(info, sizeof(int), 1024);
+  memset(info, 1024, sizeof(int));
   info[0] = 1;
 
   if (strlen(filename) > 1023) {
@@ -70,8 +70,6 @@ void plugin_get_header(int *_nx, int *_ny, int *_nbytes, float *_qx, float *_qy,
   struct stat st;
   char scr[1280];
 
-  char scr[1280];
-
   sprintf(scr, "%s/start_1", directory);
 
   if (stat(scr, &st)) {
@@ -82,7 +80,7 @@ void plugin_get_header(int *_nx, int *_ny, int *_nbytes, float *_qx, float *_qy,
 
   char *json_text = (char *)malloc(sizeof(char) * (st.st_size + 1));
 
-  FILE *fin = fopen(argv[1], "r");
+  FILE *fin = fopen(scr, "r");
   fread(json_text, st.st_size, 1, fin);
   json_text[st.st_size] = 0;
   fclose(fin);
@@ -90,9 +88,10 @@ void plugin_get_header(int *_nx, int *_ny, int *_nbytes, float *_qx, float *_qy,
   cJSON *json = cJSON_Parse(json_text);
 
   if (json == NULL) {
-    fprintf(stderr, "Error parsing %s\n", argv[1]);
+    fprintf(stderr, "Error parsing %s\n", scr);
+    *error = 1;
     free(json_text);
-    return 1;
+    return;
   }
 
   int status;
@@ -154,6 +153,8 @@ void plugin_get_data(int *_frame_number, int *_nx, int *_ny, int *_data_array,
   char scr[1280];
   sprintf(scr, "%s/image_%06d_2", directory, (*_frame_number) - 1);
 
+  struct stat st;
+
   if (stat(scr, &st)) {
     fprintf(stderr, "Error reading %s\n", scr);
     *error = 1;
@@ -162,7 +163,7 @@ void plugin_get_data(int *_frame_number, int *_nx, int *_ny, int *_data_array,
 
   char *chunk = (char *)malloc(sizeof(char) * (st.st_size + 1));
 
-  FILE *fin = fopen(argv[1], "r");
+  FILE *fin = fopen(scr, "r");
   fread(chunk, st.st_size, 1, fin);
   fclose(fin);
 
@@ -171,7 +172,7 @@ void plugin_get_data(int *_frame_number, int *_nx, int *_ny, int *_data_array,
   if (nbytes == 2) {
     uint16_t *buffer = (uint16_t *)malloc(nbytes * ny * nx);
     bshuf_decompress_lz4((chunk) + 12, (void *)buffer, st.st_size, 16, 0);
-    for (int j = 0; j < ny * nx, j++) {
+    for (int j = 0; j < ny * nx; j++) {
       _data_array[j] = buffer[j];
     }
     free(buffer);
