@@ -161,7 +161,7 @@ void plugin_get_data(int *_frame_number, int *_nx, int *_ny, int *_data_array,
     return;
   }
 
-  char *chunk = (char *)malloc(sizeof(char) * (st.st_size + 1));
+  char *chunk = (char *)malloc(sizeof(char) * (st.st_size));
 
   FILE *fin = fopen(scr, "r");
   fread(chunk, st.st_size, 1, fin);
@@ -171,13 +171,13 @@ void plugin_get_data(int *_frame_number, int *_nx, int *_ny, int *_data_array,
   // if nbytes is 4 - if 16 bit just copying not sign extending quite yet...
   if (nbytes == 2) {
     uint16_t *buffer = (uint16_t *)malloc(nbytes * ny * nx);
-    bshuf_decompress_lz4((chunk) + 12, (void *)buffer, st.st_size, 16, 0);
+    bshuf_decompress_lz4((chunk) + 12, (void *)buffer, st.st_size, nbytes, 0);
     for (int j = 0; j < ny * nx; j++) {
       _data_array[j] = buffer[j];
     }
     free(buffer);
   } else if (nbytes == 4) {
-    bshuf_decompress_lz4((chunk) + 12, (void *)_data_array, st.st_size, 32, 0);
+    bshuf_decompress_lz4((chunk) + 12, (void *)_data_array, st.st_size, nbytes, 0);
   } else {
     // we should never get here
   }
