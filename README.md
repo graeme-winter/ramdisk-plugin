@@ -33,13 +33,13 @@ As with other usages of plugins with XDS:
 LIB= /Users/graeme/git/ramdisk-plugin/build/ramdisk-plugin.so
 ```
 
-N.B. at the moment this _will not work_ because setting XDS.INP parameter:
+To have this work correctly you have to pass the template for the dumped packets - even though the header information is elsewhere. Internally this will be truncated by 15 characters to get to the actual template, as image 1 is passed to the `plugin_open` call.
 
 ```
-NAME_TEMPLATE_OF_DATA_FRAMES= /Users/graeme/data/i04-1-run3-ins/ramdisk/
+NAME_TEMPLATE_OF_DATA_FRAMES= /Users/graeme/data/i04-1-run3-ins/ramdisk/image_??????_2
 ```
 
-is not currently supported. Trying to figure out a workaround for this.
+This is a workaround, but it is one which works.
 
 ## Testing
 
