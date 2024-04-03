@@ -47,3 +47,7 @@ $(BITSHUFFLE)/bitshuffle.o $(BITSHUFFLE)/bitshuffle_core.o $(BITSHUFFLE)/iochain
 .PHONY: clean
 clean:
 	rm -r $(BUILD_DIR)
+	rm -r $(TEST_DIR)/*.o
+	rm -r $(BITSHUFFLE)/*.o
+	rm -r $(BITSHUFFLE_LZ4)/*.o
+	rm -r $(CJSON)/*.o
