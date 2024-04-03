@@ -177,7 +177,8 @@ void plugin_get_data(int *_frame_number, int *_nx, int *_ny, int *_data_array,
     }
     free(buffer);
   } else if (nbytes == 4) {
-    bshuf_decompress_lz4((chunk) + 12, (void *)_data_array, st.st_size, nbytes, 0);
+    bshuf_decompress_lz4((chunk) + 12, (void *)_data_array, st.st_size, nbytes,
+                         0);
   } else {
     // we should never get here
   }
