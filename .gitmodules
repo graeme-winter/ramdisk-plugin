@@ -1,0 +1,6 @@
+[submodule "bitshuffle"]
+	path = bitshuffle
+	url = git@github.com:kiyo-masui/bitshuffle.git
+[submodule "cJSON"]
+	path = cJSON
+	url = git@github.com:DaveGamble/cJSON.git
