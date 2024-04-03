@@ -51,6 +51,7 @@ void plugin_open(char *filename, int info[1024], int *error) {
   }
 
   strcpy(directory, filename);
+  directory[strlen(directory) - 15] = 0;
 
   struct stat st;
 
